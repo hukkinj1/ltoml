@@ -438,12 +438,14 @@ def parse_array(src: str, pos: Pos, parse_float: ParseFloat) -> tuple[Pos, list]
             return pos + 1, array
 
 
-def parse_inline_table(src: str, pos: Pos, parse_float: ParseFloat) -> tuple[Pos, dict]:
+def parse_inline_table(  # noqa: C901
+    src: str, pos: Pos, parse_float: ParseFloat
+) -> tuple[Pos, dict]:
     pos += 1
     nested_dict = NestedDict()
     flags = Flags()
 
-    pos = skip_chars(src, pos, TOML_WS)
+    pos = skip_comments_and_array_ws(src, pos)
     if src.startswith("}", pos):
         return pos + 1, nested_dict.dict
     while True:
@@ -458,16 +460,18 @@ def parse_inline_table(src: str, pos: Pos, parse_float: ParseFloat) -> tuple[Pos
         if key_stem in nest:
             raise suffixed_err(src, pos, f"Duplicate inline table key {key_stem!r}")
         nest[key_stem] = value
-        pos = skip_chars(src, pos, TOML_WS)
+        pos = skip_comments_and_array_ws(src, pos)
         c = src[pos : pos + 1]
         if c == "}":
             return pos + 1, nested_dict.dict
         if c != ",":
             raise suffixed_err(src, pos, "Unclosed inline table")
+        pos += 1
+        pos = skip_comments_and_array_ws(src, pos)
+        if src.startswith("}", pos):
+            return pos + 1, nested_dict.dict
         if isinstance(value, (dict, list)):
             flags.set(key, Flags.FROZEN, recursive=True)
-        pos += 1
-        pos = skip_chars(src, pos, TOML_WS)
 
 
 def parse_basic_str_escape(
