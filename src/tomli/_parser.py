@@ -95,6 +95,7 @@ class TOMLDecodeError(ValueError):
             or not isinstance(doc, str)
             or not isinstance(pos, int)
         ):
+            # Lazy import to improve module import time
             import warnings
 
             warnings.warn(
