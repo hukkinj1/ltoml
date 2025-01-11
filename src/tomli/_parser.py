@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import sys
 from types import MappingProxyType
-from typing import IO, TYPE_CHECKING, Any, Final, NamedTuple
 
 from ._re import (
     RE_DATETIME,
@@ -17,8 +16,10 @@ from ._re import (
     match_to_number,
 )
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from typing import IO, Any, Final
 
     from ._types import Key, ParseFloat, Pos
 
@@ -156,7 +157,7 @@ def loads(__s: str, *, parse_float: ParseFloat = float) -> dict[str, Any]:  # no
             f"Expected str object, not '{type(__s).__qualname__}'"
         ) from None
     pos = 0
-    out = Output(NestedDict(), Flags())
+    out = Output()
     header: Key = ()
     parse_float = make_safe_parse_float(parse_float)
 
@@ -307,9 +308,10 @@ class NestedDict:
             cont[last_key] = [{}]
 
 
-class Output(NamedTuple):
-    data: NestedDict
-    flags: Flags
+class Output:
+    def __init__(self) -> None:
+        self.data = NestedDict()
+        self.flags = Flags()
 
 
 def skip_chars(src: str, pos: Pos, chars: Iterable[str]) -> Pos:

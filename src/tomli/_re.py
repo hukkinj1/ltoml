@@ -7,9 +7,11 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta, timezone, tzinfo
 from functools import lru_cache
 import re
-from typing import TYPE_CHECKING, Any, Final
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from typing import Any, Final
+
     from ._types import ParseFloat
 
 # E.g.
